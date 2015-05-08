@@ -33,6 +33,69 @@ Scopes format:  `docker-worker:image:<registry>/<user>/<image>:<tag>` .  Scopes 
 #### Caches
 Scopes begin with `docker-worker:cache:<cache name>` .  Tasks that require cached volumes to be mounted must supply a scope for that cache.  This is to restrict accessing, and possibly corrupting, caches no related to the scope of credentials provided.
 
+## Capabilities
+
+There are capabilities that can be enabled for a task container that could either be
+special privileges or host devices.  These features require having the proper scopes,
+such as `docker-worker:capability:...`.
+
+#### Capability: Devices
+
+Certain host devices can be made available within a task container.  These devices
+will be mounted similar to how `docker run --device <hostPath>:<containerPath>:rwm` works.
+Currently devices will be mounted within the container using the same path as found
+on the host.
+
+Current devices supports are loopbackVideo (v4l2loopback) and loopbackAudio (snd-aloop).
+
+
+They can be enabled by including the proper scopes
+
+##### Devices: loopbackVideo
+
+Required Scopes: `docker-worker:capability:device:loopbackVideo`
+
+A video loopback device can be made available within a container.  These devices
+were created using the [v4l2loopback](https://github.com/umlaeute/v4l2loopback)
+kernel module.
+
+Example:
+
+```js
+{
+  "scopes": ["docker-worker:capability:device:loopbackVideo"],
+  "payload": {
+    "capabilities": {
+        "devices": {
+            "loopbackVideo": true
+        }
+    }
+  }
+}
+```
+
+##### Devices: loopbackAudio
+
+Required Scopes: `docker-worker:capability:device:loopbackAudio`
+
+An audio loopback device can be made available within a container.  These devices
+were created using the snd-aloop module.
+
+Example:
+
+```js
+{
+  "scopes": ["docker-worker:capability:device:loopbackAudio"],
+  "payload": {
+    "capabilities": {
+        "devices": {
+            "loopbackAudio": true
+        }
+    }
+  }
+}
+```
+
 ## Environment
 
 Environment variables can be provided in the task payload and will be added to the
